@@ -1,145 +1,220 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
   Box,
   Drawer,
-  AppBar,
-  Toolbar,
   List,
   ListItem,
-  ListItemText,
-  Typography,
-  IconButton,
-  Divider,
-  CssBaseline,
   ListItemIcon,
+  ListItemText,
+  Toolbar,
+  AppBar,
+  Typography,
   Button,
+  Avatar,
+  Divider,
+  useTheme,
+  useMediaQuery,
+  IconButton,
+  CssBaseline,
+  ThemeProvider,
+  createTheme,
 } from '@mui/material';
 import {
-  Dashboard,
-  CloudUpload,
-  CameraAlt,
-  Menu as MenuIcon,
-  Logout,
+  Dashboard as DashboardIcon,
+  VideoLibrary as VideoIcon,
+  Security as DetectionsIcon,
+  AccountCircle as ProfileIcon,
+  Logout as LogoutIcon,
+  Menu as MenuIcon
 } from '@mui/icons-material';
-import { useNavigate, Outlet, useLocation } from 'react-router-dom';
+import { useLogoutMutation } from '../api/mutation';
 
 const drawerWidth = 240;
 
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    background: {
+      default: '#121212',
+      paper: '#1e1e1e',
+    },
+  },
+});
+
 const GeneralLayout = () => {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = React.useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
-  const username = localStorage.getItem('username') || 'User';
+  const { mutate: logout } = useLogoutMutation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
+
+  const handleLogout = () => {
+    logout();
+    localStorage.clear();
+    navigate('/login', { replace: true });
+  };
 
   const navItems = [
-    { text: 'Dashboard', icon: <Dashboard />, path: '/general' },
-    { text: 'Upload Video', icon: <CloudUpload />, path: '/general/upload' },
-    { text: 'Detections', icon: <CameraAlt />, path: '/general/detections' },
+    { label: 'Dashboard', path: '/general', icon: <DashboardIcon color="primary" /> },
+    { label: 'Upload Video', path: '/general/upload-video', icon: <VideoIcon sx={{ color: '#66bb6a' }} /> },
+    { label: 'My Detections', path: '/general/detections', icon: <DetectionsIcon sx={{ color: '#ba68c8' }} /> },
+    { label: 'Profile', path: '/general/profile', icon: <ProfileIcon sx={{ color: '#ffa726' }} /> },
   ];
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
-  const logout = () => {
-    localStorage.clear();
-    navigate('/login');
-  };
-
-  const drawer = (
-    <div>
-      <Toolbar>
-        <Typography variant="h6" noWrap>
+  const drawerContent = (
+    <Box>
+      <Toolbar sx={{ display: 'flex', alignItems: 'center', px: 2 }}>
+        <Avatar sx={{ bgcolor: theme.palette.primary.main, mr: 2 }}>
+          <ProfileIcon />
+        </Avatar>
+        <Typography variant="subtitle1" noWrap>
           General User
         </Typography>
       </Toolbar>
       <Divider />
       <List>
-        {navItems.map(({ text, icon, path }) => (
+        {navItems.map((item) => (
           <ListItem
             button
-            key={text}
-            selected={location.pathname === path}
-            onClick={() => navigate(path)}
+            key={item.path}
+            component={NavLink}
+            to={item.path}
+            sx={{
+              '&.active': {
+                bgcolor: '#333',
+                borderLeft: `4px solid ${theme.palette.primary.main}`,
+              },
+              '&:hover': {
+                bgcolor: '#2a2a2a',
+              },
+              transition: 'all 0.3s ease',
+              mb: 0.5,
+            }}
           >
-            <ListItemIcon>{icon}</ListItemIcon>
-            <ListItemText primary={text} />
+            <ListItemIcon>{item.icon}</ListItemIcon>
+            <ListItemText
+              primary={item.label}
+              primaryTypographyProps={{
+                variant: 'body1',
+                sx: { fontWeight: 'medium' },
+                color: 'white',
+              }}
+            />
           </ListItem>
         ))}
       </List>
-    </div>
+    </Box>
   );
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <>
       <CssBaseline />
-
+      {/* Top AppBar */}
       <AppBar
         position="fixed"
         sx={{
-          width: { md: `calc(100% - ${drawerWidth}px)` },
-          ml: { md: `${drawerWidth}px` },
+          zIndex: theme.zIndex.drawer + 1,
+          bgcolor: '#fff',
+          color: '#333',
+          boxShadow: 'none',
+          borderBottom: '1px solid #ccc',
         }}
       >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ display: { md: 'none' }, mr: 2 }}
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            {isMobile && (
+              <IconButton
+                aria-label="open drawer"
+                edge="start"
+                onClick={handleDrawerToggle}
+                sx={{ mr: 2 }}
+              >
+                <MenuIcon />
+              </IconButton>
+            )}
+            <Typography variant="h6" noWrap sx={{ fontWeight: 'bold' }}>
+              Face Recognition System
+            </Typography>
+          </Box>
+          <Button
+            variant="outlined"
+            onClick={handleLogout}
+            startIcon={<LogoutIcon />}
+            sx={{
+              textTransform: 'none',
+              color: '#ff7043',
+              borderColor: '#ff7043',
+              '&:hover': {
+                bgcolor: 'rgba(255, 112, 67, 0.08)',
+                borderColor: '#ff7043',
+              },
+            }}
           >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
-            Welcome, {username}
-          </Typography>
-          <Button color="inherit" onClick={logout} startIcon={<Logout />}>
             Logout
           </Button>
         </Toolbar>
       </AppBar>
 
-      <Box
-        component="nav"
-        sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
-      >
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{ keepMounted: true }}
-          sx={{
-            display: { xs: 'block', md: 'none' },
-            '& .MuiDrawer-paper': { width: drawerWidth },
-          }}
-        >
-          {drawer}
-        </Drawer>
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', md: 'block' },
-            '& .MuiDrawer-paper': { width: drawerWidth },
-          }}
-          open
-        >
-          {drawer}
-        </Drawer>
-      </Box>
+      <Box sx={{ display: 'flex' }}>
+        {/* Drawer (Dark theme) */}
+        <ThemeProvider theme={darkTheme}>
+          <Box
+            component="nav"
+            sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+          >
+            {isMobile ? (
+              <Drawer
+                variant="temporary"
+                open={mobileOpen}
+                onClose={handleDrawerToggle}
+                ModalProps={{ keepMounted: true }}
+                sx={{
+                  '& .MuiDrawer-paper': {
+                    width: drawerWidth,
+                    boxSizing: 'border-box',
+                    bgcolor: darkTheme.palette.background.paper,
+                  },
+                }}
+              >
+                {drawerContent}
+              </Drawer>
+            ) : (
+              <Drawer
+                variant="permanent"
+                sx={{
+                  '& .MuiDrawer-paper': {
+                    width: drawerWidth,
+                    boxSizing: 'border-box',
+                    bgcolor: darkTheme.palette.background.paper,
+                  },
+                }}
+                open
+              >
+                {drawerContent}
+              </Drawer>
+            )}
+          </Box>
+        </ThemeProvider>
 
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          width: { md: `calc(100% - ${drawerWidth}px)` },
-        }}
-      >
-        <Toolbar />
-        <Outlet />
+        {/* Main Content (Light theme) */}
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            p: 3,
+            width: { sm: `calc(100% - ${drawerWidth}px)` },
+            bgcolor: '#f9f9f9',
+            minHeight: '100vh',
+          }}
+        >
+          <Toolbar />
+          <Outlet />
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 };
 

@@ -29,7 +29,20 @@ const Users = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    mutate(form);
+    const userData = { ...form };
+
+    if (userData.role === 'student') {
+      if (!userData.roll_number.trim()) {
+        alert("Roll number is required for students.");
+        return;
+      }
+    } else {
+      delete userData.roll_number;
+      delete userData.role; // ✅ Let backend handle the role
+    }
+
+    console.log("Submitting userData:", userData);
+    mutate(userData);
   };
 
   return (
@@ -51,6 +64,7 @@ const Users = () => {
                 />
               </Grid>
             ))}
+
             <Grid item xs={12} sm={6}>
               <TextField
                 label="Role"
@@ -67,6 +81,7 @@ const Users = () => {
                 ))}
               </TextField>
             </Grid>
+
             {form.role === 'student' && (
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -80,11 +95,26 @@ const Users = () => {
               </Grid>
             )}
           </Grid>
-          <Button type="submit" variant="contained" sx={{ mt: 2 }} disabled={isPending}>
+
+          <Button
+            type="submit"
+            variant="contained"
+            sx={{ mt: 2 }}
+            disabled={isPending}
+          >
             {isPending ? 'Creating...' : 'Create User'}
           </Button>
-          {isSuccess && <Typography color="success.main" mt={2}>User created successfully!</Typography>}
-          {isError && <Typography color="error.main" mt={2}>{error.message}</Typography>}
+
+          {isSuccess && (
+            <Typography color="success.main" mt={2}>
+              User created successfully!
+            </Typography>
+          )}
+          {isError && (
+            <Typography color="error.main" mt={2}>
+              {error.message}
+            </Typography>
+          )}
         </form>
       </Paper>
     </Box>

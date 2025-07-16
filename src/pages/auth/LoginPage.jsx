@@ -1,5 +1,5 @@
 // src/pages/auth/LoginPage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -18,6 +18,16 @@ const LoginPage = () => {
   const [form, setForm] = useState({ username: '', password: '' });
   const { mutate, isPending, isError, error } = useLoginMutation();
 
+  // Check if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
+    
+    if (token && role) {
+      navigate(`/${role}`, { replace: true });
+    }
+  }, [navigate]);
+
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -26,12 +36,9 @@ const LoginPage = () => {
     e.preventDefault();
     mutate(form, {
       onSuccess: (data) => {
-        // Store token and role
         localStorage.setItem('token', data.token);
         localStorage.setItem('role', data.user.role);
         localStorage.setItem('username', data.user.username);
-
-        // Redirect to respective dashboard
         navigate(`/${data.user.role}`, { replace: true });
       },
     });
@@ -41,7 +48,10 @@ const LoginPage = () => {
     <Container maxWidth="sm" sx={{ mt: 8 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
         <Typography variant="h5" gutterBottom>
-          Login
+          Admin / General User Login
+        </Typography>
+        <Typography variant="body2" color="text.secondary" gutterBottom>
+          Students should use the signup page to register first.
         </Typography>
 
         {isError && (
@@ -71,16 +81,21 @@ const LoginPage = () => {
             required
           />
 
-          <Box mt={3}>
+          <Box mt={3} display="flex" justifyContent="space-between">
             <Button
               type="submit"
-              fullWidth
               variant="contained"
               color="primary"
               disabled={isPending}
               startIcon={isPending && <CircularProgress size={18} />}
             >
               {isPending ? 'Logging in...' : 'Login'}
+            </Button>
+            <Button
+              variant="text"
+              onClick={() => navigate('/signup')}
+            >
+              Are you a student? Sign up here
             </Button>
           </Box>
         </form>

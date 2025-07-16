@@ -9,7 +9,7 @@ export const API_ENDPOINTS = {
 
   // 👑 Admin APIs
   ADMIN_CREATE_USER: '/admin/users/create/',
-  ADMIN_USERS: '/admin/users/',
+  ADMIN_GET_USERS: '/admin/users/',
   ADMIN_USER_DETAIL: (id) => `/admin/users/${id}/`,
   ADMIN_RECORD_FACE: '/admin/faces/record/',
   ADMIN_UPLOAD_VIDEO: '/admin/videos/upload/',
