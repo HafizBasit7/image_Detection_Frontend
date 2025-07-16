@@ -15,7 +15,7 @@ const UserDetail = () => {
       <Paper sx={{ p: 3 }}>
         <Typography><strong>ID:</strong> {user.id}</Typography>
         <Typography><strong>Username:</strong> {user.username}</Typography>
-        <Typography><strong>Email:</strong> {user.email}</Typography>
+        {/* <Typography><strong>Email:</strong> {user.email}</Typography> */}
         <Typography><strong>Role:</strong> {user.role}</Typography>
       </Paper>
     </Box>

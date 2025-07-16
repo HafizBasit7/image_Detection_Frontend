@@ -98,7 +98,7 @@ deleteUser.mutate(id);
               <TableRow>
                 <TableCell>#</TableCell>
                 <TableCell>Username</TableCell>
-                <TableCell>Email</TableCell>
+                {/* <TableCell>Email</TableCell> */}
                 <TableCell>First Name</TableCell>
                 <TableCell>Last Name</TableCell>
                 <TableCell>Role</TableCell>
@@ -119,7 +119,7 @@ deleteUser.mutate(id);
                   <TableRow key={user.id}>
                     <TableCell>{users.length - index}</TableCell>
                     <TableCell>{user.username}</TableCell>
-                    <TableCell>{user.email}</TableCell> 
+                    {/* <TableCell>{user.email}</TableCell>  */}
                     <TableCell>{user.first_name}</TableCell>
                     <TableCell>{user.last_name}</TableCell>
                     <TableCell>{user.role}</TableCell>
@@ -147,7 +147,7 @@ deleteUser.mutate(id);
       <Dialog open={Boolean(selectedUser)} onClose={() => setSelectedUser(null)} maxWidth="sm" fullWidth>
         <DialogTitle>Edit User</DialogTitle>
         <DialogContent>
-          {['username', 'email', 'first_name', 'last_name', 'role', 'roll_number'].map((field) => (
+          {['username', 'first_name', 'last_name', 'role', 'roll_number'].map((field) => (
             <TextField
               key={field}
               margin="dense"
