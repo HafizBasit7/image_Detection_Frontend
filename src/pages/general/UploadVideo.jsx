@@ -5,22 +5,26 @@ import {
   TextField,
   Button,
   Paper,
-  Input,
   Alert,
   CircularProgress,
   Grid,
   Card,
   CardMedia,
+  useTheme,
+  Stack
 } from '@mui/material';
+import { CloudUpload } from '@mui/icons-material';
 import { useGeneralVideoUpload } from '../../api/mutation';
 import { useQueryClient } from '@tanstack/react-query';
 
 const GeneralUpload = () => {
+  const theme = useTheme();
   const [rollNumber, setRollNumber] = useState('');
   const [videoFile, setVideoFile] = useState(null);
   const [responseData, setResponseData] = useState(null);
   const [successMsg, setSuccessMsg] = useState('');
   const [submittedRollNumber, setSubmittedRollNumber] = useState('');
+
   const { mutate, isPending, isError, error } = useGeneralVideoUpload();
   const queryClient = useQueryClient();
 
@@ -39,8 +43,6 @@ const GeneralUpload = () => {
         setResponseData(data?.detection_data);
         setRollNumber('');
         setVideoFile(null);
-
-        // Refetch if needed elsewhere
         queryClient.invalidateQueries(['general-detections']);
       },
     });
@@ -58,72 +60,85 @@ const GeneralUpload = () => {
       .filter(Boolean)
       .map((filepath) => ({
         filepath,
-        url: `http://127.0.0.1:8000${filepath}`, 
+        url: `http://127.0.0.1:8000${filepath}`,
       }));
 
   return (
-    <Box>
-      <Typography variant="h5" gutterBottom>
+    <Box maxWidth={700} mx="auto">
+      <Typography variant="h4" fontWeight={700} gutterBottom>
         Upload Video for Detection
       </Typography>
 
-      <Paper elevation={3} sx={{ p: 3 }}>
-        {isError && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error?.response?.data?.message || 'Upload failed. Please try again.'}
-          </Alert>
-        )}
-
-        {successMsg && (
-          <Alert severity="success" sx={{ mb: 2 }}>
-            {successMsg}
-          </Alert>
-        )}
-
-        {responseData && (
-          <Alert severity={hasDetections ? 'success' : 'warning'} sx={{ mb: 2 }}>
-            {hasDetections
-              ? 'Detections found successfully.'
-              : `No detections found — roll number "${submittedRollNumber}" was not detected in the video.`}
-          </Alert>
-        )}
-
+      <Paper
+        sx={{
+          p: 4,
+          borderRadius: 3,
+          boxShadow: theme.shadows[3],
+          backgroundColor: theme.palette.background.paper,
+        }}
+      >
         <form onSubmit={handleSubmit}>
-          <TextField
-            fullWidth
-            label="Roll Number"
-            value={rollNumber}
-            onChange={(e) => setRollNumber(e.target.value)}
-            required
-            sx={{ mb: 2 }}
-          />
-          <Input
-            type="file"
-            onChange={(e) => setVideoFile(e.target.files[0])}
-            required
-            inputProps={{ accept: '.mp4,.avi,.mov,.mkv,.wmv' }}
-          />
-          <Box mt={2}>
+          <Stack spacing={3}>
+            {isError && (
+              <Alert severity="error">
+                {error?.response?.data?.message || 'Upload failed. Please try again.'}
+              </Alert>
+            )}
+
+            {successMsg && <Alert severity="success">{successMsg}</Alert>}
+
+            {responseData && (
+              <Alert severity={hasDetections ? 'success' : 'warning'}>
+                {hasDetections
+                  ? 'Detections found successfully.'
+                  : `No detections found — roll number "${submittedRollNumber}" was not detected in the video.`}
+              </Alert>
+            )}
+
+            <TextField
+              fullWidth
+              label="Roll Number"
+              value={rollNumber}
+              onChange={(e) => setRollNumber(e.target.value)}
+              required
+            />
+
+            <Button
+              variant="outlined"
+              component="label"
+              startIcon={<CloudUpload />}
+              fullWidth
+            >
+              {videoFile ? videoFile.name : 'Choose Video File'}
+              <input
+                type="file"
+                hidden
+                onChange={(e) => setVideoFile(e.target.files[0])}
+                accept=".mp4,.avi,.mov,.mkv,.wmv"
+              />
+            </Button>
+
             <Button
               type="submit"
               variant="contained"
-              disabled={isPending}
+              size="large"
+              disabled={isPending || !videoFile}
               startIcon={isPending && <CircularProgress size={18} />}
             >
               {isPending ? 'Uploading...' : 'Submit Video'}
             </Button>
-          </Box>
+          </Stack>
         </form>
       </Paper>
 
       {/* Screenshots Section */}
       {hasDetections && (
-        <Box mt={4}>
-          <Typography variant="h6" gutterBottom>
+        <Box mt={5}>
+          <Typography variant="h6" fontWeight={600} gutterBottom>
             Detected Screenshots
           </Typography>
 
-          {detectedScreenshots && detectedScreenshots.length > 0 ? (
+          {detectedScreenshots.length > 0 ? (
             <Grid container spacing={2}>
               {detectedScreenshots.map((ss, idx) => (
                 <Grid item xs={12} sm={6} md={4} key={idx}>
@@ -132,14 +147,14 @@ const GeneralUpload = () => {
                       component="img"
                       height="200"
                       image={ss.url}
-                      alt={ss.filepath}
+                      alt={`Screenshot ${idx + 1}`}
                     />
                   </Card>
                 </Grid>
               ))}
             </Grid>
           ) : (
-            <Typography color="text.secondary" sx={{ mt: 2 }}>
+            <Typography color="text.secondary" mt={2}>
               No screenshots available.
             </Typography>
           )}

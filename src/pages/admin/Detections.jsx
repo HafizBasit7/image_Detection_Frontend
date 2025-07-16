@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
+  Box,
   Typography,
   Table,
   TableHead,
@@ -9,11 +10,26 @@ import {
   Paper,
   TableContainer,
   Button,
+  CircularProgress,
+  Alert,
+  Avatar,
+  Stack,
+  useTheme
 } from '@mui/material';
+import {
+  VideoLibrary as VideoIcon,
+  Image as ImageIcon,
+  Timeline as StatsIcon,
+  Download as DownloadIcon
+} from '@mui/icons-material';
 import { useAdminDetections } from '../../api/mutation';
 
 const Detections = () => {
-  const { data, isLoading } = useAdminDetections();
+  const theme = useTheme();
+  const { data, isLoading, isError, error } = useAdminDetections();
+  const [visibleCount, setVisibleCount] = useState(10); // initial records to show
+
+  const rows = data?.results || [];
 
   const downloadFile = async (url, filename) => {
     try {
@@ -25,15 +41,14 @@ const Detections = () => {
       link.download = filename;
       link.click();
       window.URL.revokeObjectURL(link.href);
-    } catch (error) {
-      console.error('Download failed:', error);
+    } catch (err) {
+      console.error('Download failed:', err);
       alert(`Failed to download: ${filename}`);
     }
   };
 
   const handleDownloadScreenshots = (screenshots) => {
     if (!Array.isArray(screenshots) || screenshots.length === 0) return;
-
     screenshots.forEach((relativeUrl) => {
       const fullUrl = `http://127.0.0.1:8000${relativeUrl}`;
       const parts = relativeUrl.split('/');
@@ -42,95 +57,152 @@ const Detections = () => {
     });
   };
 
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => prev + 10);
+  };
+
   return (
-    <div>
-      <Typography variant="h5" gutterBottom>
-        Detections
+    <Box>
+      <Typography variant="h4" fontWeight={700} mb={2}>
+        Admin Detections
       </Typography>
 
       {isLoading ? (
-        <Typography>Loading...</Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <CircularProgress size={50} />
+        </Box>
+      ) : isError ? (
+        <Alert severity="error">
+          {error?.response?.data?.message || 'Failed to load admin detection records.'}
+        </Alert>
+      ) : rows.length === 0 ? (
+        <Paper sx={{ p: 4, textAlign: 'center' }}>
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            No detection records found.
+          </Typography>
+        </Paper>
       ) : (
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Roll Number</TableCell>
-                <TableCell>Stats</TableCell>
-                <TableCell>Video</TableCell>
-                <TableCell>Download</TableCell>
-                <TableCell>Date</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {data?.results?.map((row) => {
-                const stats = row.stats ? JSON.parse(row.stats) : null;
-
-                // Prefer screenshots_list array, fallback to comma-separated screenshots_urls
-                const screenshots = Array.isArray(row.screenshots_list)
-                  ? row.screenshots_list
-                  : row.screenshots_urls?.split(',') ?? [];
-
-                return (
-                  <TableRow key={row.id}>
-                    <TableCell>{row.roll_number}</TableCell>
-
-                    <TableCell>
-                      {stats ? (
-                        <>
-                          <div>
-                            <strong>Total Detections:</strong> {stats.total_detections}
-                          </div>
-                          <div>
-                            <strong>Confidence Score:</strong> {stats.confidence_score}
-                          </div>
-                          <div>
-                            <strong>Duration Detected:</strong> {stats.duration_detected}
-                          </div>
-                          <div>
-                            <strong>Frames Detected:</strong> {stats.frames_detected?.join(', ')}
-                          </div>
-                        </>
-                      ) : (
-                        'N/A'
-                      )}
-                    </TableCell>
-
-                    <TableCell>
-                      {row.video_url ? (
-                        <a href={row.video_url} target="_blank" rel="noopener noreferrer">
-                          View Video
-                        </a>
-                      ) : (
-                        'N/A'
-                      )}
-                    </TableCell>
-
-                    <TableCell>
-                      {screenshots.length > 0 ? (
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          onClick={() => handleDownloadScreenshots(screenshots)}
-                        >
-                          Download Screenshots
-                        </Button>
-                      ) : (
-                        'N/A'
-                      )}
-                    </TableCell>
-
-                    <TableCell>
-                      {new Date(row.created_at).toLocaleString()}
-                    </TableCell>
+        <>
+          <Paper sx={{ borderRadius: 2, overflow: 'hidden' }}>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: theme.palette.grey[100] }}>
+                    <TableCell sx={{ fontWeight: 600 }}>Roll Number</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Stats</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Video</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Screenshots</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
                   </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {rows.slice(0, visibleCount).map((row) => {
+                    const stats = row.stats ? JSON.parse(row.stats) : null;
+                    const screenshots = Array.isArray(row.screenshots_list)
+                      ? row.screenshots_list
+                      : row.screenshots_urls?.split(',') ?? [];
+
+                    return (
+                      <TableRow key={row.id} hover>
+                    <TableCell>
+  <Avatar 
+    sx={{ 
+      bgcolor: theme.palette.primary.main,
+      width: 40,
+      height: 40,
+      fontSize: 16
+    }}
+  >
+    {row.roll_number || 'N/A'}
+  </Avatar>
+</TableCell>
+
+
+                        <TableCell>
+                          {stats ? (
+                            <Stack spacing={0.5}>
+                              <Typography variant="body2">
+                                <strong>Total:</strong> {stats.total_detections}
+                              </Typography>
+                              <Typography variant="body2">
+                                <strong>Confidence:</strong> {stats.confidence_score}
+                              </Typography>
+                              <Typography variant="body2">
+                                <strong>Duration:</strong> {stats.duration_detected}
+                              </Typography>
+                              <Typography variant="body2">
+                                <strong>Frames:</strong> {stats.frames_detected?.join(', ') || 'N/A'}
+                              </Typography>
+                            </Stack>
+                          ) : (
+                            <Typography variant="body2" color="text.secondary">
+                              N/A
+                            </Typography>
+                          )}
+                        </TableCell>
+
+                        <TableCell>
+                          {row.video_url ? (
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              startIcon={<VideoIcon />}
+                              onClick={() => window.open(row.video_url, '_blank')}
+                            >
+                              View Video
+                            </Button>
+                          ) : (
+                            <Typography variant="body2" color="text.secondary">
+                              N/A
+                            </Typography>
+                          )}
+                        </TableCell>
+
+                        <TableCell>
+                          {screenshots.length > 0 ? (
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              startIcon={<DownloadIcon />}
+                              onClick={() => handleDownloadScreenshots(screenshots)}
+                            >
+                              {`Download (${screenshots.length})`}
+                            </Button>
+                          ) : (
+                            <Typography variant="body2" color="text.secondary">
+                              N/A
+                            </Typography>
+                          )}
+                        </TableCell>
+
+                        <TableCell>
+                          <Stack>
+                            <Typography variant="body2">
+                              {new Date(row.created_at).toLocaleDateString()}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {new Date(row.created_at).toLocaleTimeString()}
+                            </Typography>
+                          </Stack>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+
+          {visibleCount < rows.length && (
+            <Box textAlign="center" mt={3}>
+              <Button variant="contained" onClick={handleLoadMore}>
+                Load More
+              </Button>
+            </Box>
+          )}
+        </>
       )}
-    </div>
+    </Box>
   );
 };
 

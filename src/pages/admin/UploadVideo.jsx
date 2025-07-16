@@ -5,16 +5,20 @@ import {
   TextField,
   Button,
   Paper,
-  Input,
+  Avatar,
+  Stack,
   Alert,
   CircularProgress,
   Grid,
   Card,
   CardMedia,
+  useTheme
 } from '@mui/material';
+import { VideoFile } from '@mui/icons-material';
 import { useAdminVideoUpload } from '../../api/mutation';
 
 const UploadVideo = () => {
+  const theme = useTheme();
   const [rollNumber, setRollNumber] = useState('');
   const [video, setVideo] = useState(null);
   const [responseData, setResponseData] = useState(null);
@@ -56,62 +60,78 @@ const UploadVideo = () => {
       }));
 
   return (
-    <Box>
-      <Typography variant="h5" gutterBottom>
-        Upload Video (Admin)
+    <Box maxWidth={600} mx="auto">
+      <Typography variant="h4" fontWeight={700} gutterBottom>
+        Upload Detection Video
       </Typography>
 
-      <Paper sx={{ p: 3 }}>
-        {isError && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error?.response?.data?.message || 'Upload failed. Please try again.'}
-          </Alert>
-        )}
+      <Paper
+        sx={{
+          p: 4,
+          borderRadius: 3,
+          boxShadow: theme.shadows[3],
+          backgroundColor: theme.palette.background.paper,
+        }}
+      >
+        <Stack spacing={3}>
+          {isError && (
+            <Alert severity="error">
+              {error?.response?.data?.message || 'Upload failed. Please try again.'}
+            </Alert>
+          )}
 
-        {successMsg && (
-          <Alert severity="success" sx={{ mb: 2 }}>
-            {successMsg}
-          </Alert>
-        )}
+          {successMsg && <Alert severity="success">{successMsg}</Alert>}
 
-        {responseData && (
-          <Alert severity={hasDetections ? 'success' : 'warning'} sx={{ mb: 2 }}>
-            {hasDetections
-              ? 'Detections found successfully.'
-              : `No detections found — roll number "${submittedRollNumber}" was not detected in the video.`}
-          </Alert>
-        )}
+          {responseData && (
+            <Alert severity={hasDetections ? 'success' : 'warning'}>
+              {hasDetections
+                ? 'Detections found successfully.'
+                : `No detections found — roll number "${submittedRollNumber}" was not detected in the video.`}
+            </Alert>
+          )}
 
-        <form onSubmit={handleSubmit}>
-          <TextField
-            label="Roll Number"
-            fullWidth
-            value={rollNumber}
-            onChange={(e) => setRollNumber(e.target.value)}
-            required
-            sx={{ mb: 2 }}
-          />
-          <Input
-            type="file"
-            inputProps={{ accept: '.mp4,.avi,.mov,.mkv,.wmv' }}
-            onChange={(e) => setVideo(e.target.files[0])}
-            required
-          />
-          <Button
-            type="submit"
-            variant="contained"
-            sx={{ mt: 2 }}
-            disabled={isPending}
-            startIcon={isPending && <CircularProgress size={18} />}
-          >
-            {isPending ? 'Uploading...' : 'Upload'}
-          </Button>
-        </form>
+          <form onSubmit={handleSubmit}>
+            <Stack spacing={3}>
+              <TextField
+                label="Roll Number"
+                fullWidth
+                value={rollNumber}
+                onChange={(e) => setRollNumber(e.target.value)}
+                required
+              />
+
+              <label htmlFor="video-upload">
+                <input
+                  id="video-upload"
+                  type="file"
+                  accept=".mp4,.avi,.mov,.mkv,.wmv"
+                  style={{ display: 'none' }}
+                  onChange={(e) => setVideo(e.target.files[0])}
+                />
+                <Button
+                  variant="outlined"
+                  component="span"
+                  startIcon={<VideoFile />}
+                >
+                  Choose Video
+                </Button>
+              </label>
+
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={isPending || !video}
+                startIcon={isPending && <CircularProgress size={18} />}
+              >
+                {isPending ? 'Uploading...' : 'Upload Video'}
+              </Button>
+            </Stack>
+          </form>
+        </Stack>
       </Paper>
 
-      {/* Screenshots Section */}
       {hasDetections && (
-        <Box mt={4}>
+        <Box mt={5}>
           <Typography variant="h6" gutterBottom>
             Detected Screenshots
           </Typography>
@@ -120,7 +140,13 @@ const UploadVideo = () => {
             <Grid container spacing={2}>
               {detectedScreenshots.map((ss, idx) => (
                 <Grid item xs={12} sm={6} md={4} key={idx}>
-                  <Card>
+                  <Card
+                    sx={{
+                      borderRadius: 2,
+                      overflow: 'hidden',
+                      boxShadow: theme.shadows[2],
+                    }}
+                  >
                     <CardMedia
                       component="img"
                       height="200"

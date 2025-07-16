@@ -104,16 +104,7 @@ export const useAdminCreateUser = () =>
     },
   });
 
-// Upload Face
-export const useAdminRecordFace = () =>
-  useMutation({
-    mutationFn: async (formData) => {
-      const res = await API.post(API_ENDPOINTS.ADMIN_RECORD_FACE, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      return res.data;
-    },
-  });
+ 
 
 // Upload Video
 export const useAdminVideoUpload = () =>
@@ -251,6 +242,16 @@ export const useAdminUserDetail = (userId) =>
     enabled: !!userId, // ✅ this line prevents auto-fetch if userId is falsy
   });
 
+// Upload Face Record
+export const useAdminRecordFace = () =>
+  useMutation({
+    mutationFn: async (formData) => {
+      const res = await API.post(API_ENDPOINTS.ADMIN_RECORD_FACE, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return res.data;
+    },
+  });
 
 
 
