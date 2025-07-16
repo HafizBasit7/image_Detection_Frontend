@@ -89,75 +89,84 @@ const StudentDashboard = () => {
   };
 
   const stats = [
-    {
-      title: "Total Recognitions",
-      value: totalDetections,
-      icon: <CameraIcon />,
-      color: theme.palette.primary.main,
-      loading: detLoading
-    },
-    {
-      title: "Admin Recognitions",
-      value: adminDetections,
-      icon: <AdminIcon />,
-      color: theme.palette.success.main,
-      loading: detLoading
-    },
-    {
-      title: "General Recognitions",
-      value: userDetections,
-      icon: <UserIcon />,
-      color: theme.palette.warning.main,
-      loading: detLoading
-    },
-    {
-      title: "Last Detection",
-      value: lastDetection ? new Date(lastDetection.created_at).toLocaleDateString() : 'Never',
-      icon: <DateIcon />,
-      color: theme.palette.info.main,
-      loading: detLoading
-    }
-  ];
+  {
+    title: "Total Recognitions",
+    value: totalDetections,
+    icon: <CameraIcon />,
+    color: "linear-gradient(135deg, #ba68c8, #ce93d8)", // purple-lavender
+    loading: detLoading
+  },
+  {
+    title: "Admin Recognitions",
+    value: adminDetections,
+    icon: <AdminIcon />,
+    color: "linear-gradient(135deg, #66bb6a, #81c784)", // green
+    loading: detLoading
+  },
+  {
+    title: "General Recognitions",
+    value: userDetections,
+    icon: <UserIcon />,
+    color: "linear-gradient(135deg, #29b6f6, #4fc3f7)", // blue-cyan
+    loading: detLoading
+  },
+  {
+    title: "Last Detection",
+    value: lastDetection ? new Date(lastDetection.created_at).toLocaleDateString() : 'Never',
+    icon: <DateIcon />,
+    color: "linear-gradient(135deg, #f48fb1, #f8bbd0)", // pink-rose
+    loading: detLoading
+  }
+];
 
-  const StatCard = ({ title, value, icon, color, loading }) => (
-    <Card sx={{ 
-      height: '100%', 
-      position: 'relative',
-      overflow: 'hidden',
-      borderLeft: `4px solid ${color}`,
-      boxShadow: theme.shadows[2],
-      transition: 'transform 0.3s, box-shadow 0.3s',
+
+const StatCard = ({ title, value, icon, color, loading }) => (
+  <Card
+    sx={{
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      backgroundImage: color,
+      backgroundSize: '200% 200%',
+      color: '#fff',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+      borderRadius: 2,
+      transition: 'transform 0.3s ease',
       '&:hover': {
         transform: 'translateY(-4px)',
-        boxShadow: theme.shadows[6]
+        boxShadow: '0 6px 18px rgba(0,0,0,0.2)'
       }
-    }}>
-      <CardContent>
-        <Stack direction="row" alignItems="center" spacing={2}>
-          <Avatar sx={{ 
-            bgcolor: `${color}20`, 
-            color: color,
-            width: 48,
-            height: 48
-          }}>
-            {React.cloneElement(icon, { fontSize: "medium" })}
-          </Avatar>
-          <Box>
-            <Typography variant="subtitle2" color="text.secondary">
-              {title}
-            </Typography>
-            {loading ? (
-              <Skeleton variant="text" width={100} height={40} />
-            ) : (
-              <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                {value}
-              </Typography>
-            )}
-          </Box>
-        </Stack>
-      </CardContent>
-    </Card>
-  );
+    }}
+  >
+    <CardContent>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+        <Box
+          sx={{
+            bgcolor: 'rgba(255, 255, 255, 0.2)',
+            p: 1,
+            borderRadius: '50%',
+            mr: 1,
+            display: 'flex'
+          }}
+        >
+          {React.cloneElement(icon, { fontSize: 'medium' })}
+        </Box>
+        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          {title}
+        </Typography>
+      </Box>
+      {loading ? (
+        <Skeleton variant="rectangular" width="80px" height={32} sx={{ bgcolor: 'rgba(255,255,255,0.3)' }} />
+      ) : (
+        <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+          {value}
+        </Typography>
+      )}
+    </CardContent>
+  </Card>
+);
+
 
   return (
     <Box sx={{ flexGrow: 1 }}>
