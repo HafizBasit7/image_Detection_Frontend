@@ -33,6 +33,7 @@ import GeneralProfile from "./pages/general/GeneralProfile";
 import StudentDashboard from "./pages/student/Dashboard";
 import StudentUpload from "./pages/student/MyFace";
 import StudentDetections from "./pages/student/Detections";
+import StudentProfile from "./pages/student/StudentProfile";
 
 function App() {
   const { isAuthenticated, role } = useAuth();
@@ -90,6 +91,7 @@ function App() {
         <Route index element={<StudentDashboard />} />
         <Route path="upload" element={<StudentUpload />} />
         <Route path="detections" element={<StudentDetections />} />
+        <Route path="profile" element={<StudentProfile />} />
       </Route>
     </Routes>
   );

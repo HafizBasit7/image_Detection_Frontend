@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography, Paper } from '@mui/material';
 import { useUserProfile } from '../../api/mutation';
 
-const GeneralProfile = () => {
+const StudentProfile = () => {
   const { data: profile, isLoading } = useUserProfile();
 
   if (isLoading) return <Typography>Loading...</Typography>;
@@ -19,4 +19,4 @@ const GeneralProfile = () => {
   );
 };
 
-export default GeneralProfile;
+export default StudentProfile;

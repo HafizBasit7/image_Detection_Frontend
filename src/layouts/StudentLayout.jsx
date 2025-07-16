@@ -35,6 +35,7 @@ const StudentLayout = () => {
     { text: 'Dashboard', icon: <Dashboard />, path: '/student' },
     { text: 'My Face Record', icon: <Face />, path: '/student/upload' },
     { text: 'Detections', icon: <CameraAlt />, path: '/student/detections' },
+    { label: 'Profile',icon: <Face />, path: '/student/profile' },
   ];
 
   const handleDrawerToggle = () => {
