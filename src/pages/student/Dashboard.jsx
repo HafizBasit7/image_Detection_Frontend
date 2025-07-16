@@ -168,7 +168,7 @@ const StudentDashboard = () => {
             color: theme.palette.text.primary,
             mb: 0.5
           }}>
-            Recognition Dashboard
+            Student Dashboard
           </Typography>
           <Typography variant="body1" sx={{ color: 'text.secondary' }}>
             {detLoading ? 'Loading your data...' : 
@@ -176,7 +176,7 @@ const StudentDashboard = () => {
              'No recognition records yet'}
           </Typography>
         </Box>
-        <Stack direction="row" spacing={1}>
+        {/* <Stack direction="row" spacing={1}>
           <Button
             variant="outlined"
             startIcon={<RefreshIcon />}
@@ -191,8 +191,8 @@ const StudentDashboard = () => {
             disabled={detLoading || totalDetections === 0}
           >
             Export
-          </Button>
-        </Stack>
+          </Button> */}
+        {/* </Stack> */}
       </Stack>
 
       <Grid container spacing={3} sx={{ mb: 3 }}>

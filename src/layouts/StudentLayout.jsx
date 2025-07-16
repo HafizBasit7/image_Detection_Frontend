@@ -60,7 +60,7 @@ const StudentLayout = () => {
 
   const navItems = [
     { label: 'Dashboard', path: '/student', icon: <DashboardIcon color="primary" /> },
-    { label: 'My Face Record', path: '/student/upload', icon: <FaceIcon sx={{ color: '#66bb6a' }} /> },
+    // { label: 'My Face Record', path: '/student/upload', icon: <FaceIcon sx={{ color: '#66bb6a' }} /> },
     { label: 'Detections', path: '/student/detections', icon: <CameraIcon sx={{ color: '#ba68c8' }} /> },
     { label: 'Profile', path: '/student/profile', icon: <ProfileIcon sx={{ color: '#ffa726' }} /> },
   ];

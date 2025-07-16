@@ -171,6 +171,8 @@ export const useUserProfile = () =>
       const res = await API.get(API_ENDPOINTS.USER_PROFILE);
       return res.data;
     },
+    staleTime: 0, // Immediately stale so it refetches
+    cacheTime: 0, // Optional: removes from cache quickly
   });
 
 // Get Public Face Files (for image gallery or preview)

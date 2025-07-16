@@ -91,7 +91,7 @@ const StudentDetections = () => {
              `${detections.length} records found`}
           </Typography>
         </Box>
-        <Stack direction="row" spacing={1}>
+        {/* <Stack direction="row" spacing={1}>
           <Tooltip title="Refresh data">
             <IconButton onClick={refetch} disabled={isLoading}>
               <RefreshIcon />
@@ -111,7 +111,7 @@ const StudentDetections = () => {
           >
             Export
           </Button>
-        </Stack>
+        </Stack> */}
       </Stack>
 
       {isLoading ? (
@@ -132,9 +132,9 @@ const StudentDetections = () => {
           <Typography variant="body1" sx={{ mb: 2 }}>
             Your face recognition history will appear here once detected.
           </Typography>
-          <Button variant="contained" onClick={refetch}>
+          {/* <Button variant="contained" onClick={refetch}>
             Refresh
-          </Button>
+          </Button> */}
         </Paper>
       ) : (
         <>

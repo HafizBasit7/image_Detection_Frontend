@@ -21,7 +21,7 @@ export const API_ENDPOINTS = {
 
   // 🎓 Student APIs
   STUDENT_GET_DETECTIONS: '/student/detections/',
-  STUDENT_UPLOAD_FACE: '/admin/faces/record/', // ✅ same endpoint as Admin
+  // STUDENT_UPLOAD_FACE: '/admin/faces/record/', // ✅ same endpoint as Admin
 
   // 🧪 Testing
   TEST_MEDIA_FILES: '/test/media-files/',
