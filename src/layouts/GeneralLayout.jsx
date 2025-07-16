@@ -52,7 +52,7 @@ const GeneralLayout = () => {
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
 
   const handleLogout = () => {
-    logout();
+    // logout();
     localStorage.clear();
     navigate('/login', { replace: true });
   };

@@ -46,49 +46,43 @@ export const useLogoutMutation = () =>
   });
 
 // Student Signup
+
 export const useStudentSignupMutation = () =>
   useMutation({
     mutationFn: async (studentData) => {
+      // Optional: frontend-level password validation
       if (studentData.password && studentData.password.length < 8) {
-        throw new Error('Password must be at least 8 characters');
-      }
-
-      const response = await API.post('/auth/student-signup/', studentData, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const { access, refresh } = response.data;
-
-      if (access && refresh) {
-        localStorage.setItem('access_token', access);
-        localStorage.setItem('refresh_token', refresh);
-      }
-
-      return response.data;
-    },
-
-    onError: (error) => {
-      if (error.message === 'Password must be at least 8 characters') {
-        return {
+        throw {
           error: {
-            password: ['Password must be at least 8 characters'],
+            password: ['Password must be at least 8 characters long'],
           },
         };
       }
 
-      if (error.response?.status === 400) {
-        return {
-          error: error.response.data,
+      try {
+        const response = await API.post(API_ENDPOINTS.STUDENT_SIGNUP, studentData, {
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        const { access, refresh } = response.data;
+
+        if (access && refresh) {
+          localStorage.setItem('access_token', access);
+          localStorage.setItem('refresh_token', refresh);
+        }
+
+        return response.data;
+      } catch (error) {
+        if (error.response?.status === 400) {
+          throw { error: error.response.data };
+        }
+
+        throw {
+          error: {
+            non_field_errors: ['An unexpected error occurred. Please try again.'],
+          },
         };
       }
-
-      return {
-        error: {
-          non_field_errors: ['An unexpected error occurred. Please try again.'],
-        },
-      };
     },
   });
 
@@ -96,11 +90,23 @@ export const useStudentSignupMutation = () =>
 // ================== 👑 ADMIN ==================
 
 // Create User
-export const useAdminCreateUser = () =>
+export const useAdminCreateUserMutation = () =>
   useMutation({
     mutationFn: async (userData) => {
-      const res = await API.post(API_ENDPOINTS.ADMIN_CREATE_USER, userData);
-      return res.data;
+      try {
+        const response = await API.post(API_ENDPOINTS.ADMIN_CREATE_USER, userData);
+        return response.data;
+      } catch (error) {
+        if (error.response?.status === 400) {
+          throw { error: error.response.data };
+        }
+
+        throw {
+          error: {
+            non_field_errors: ['Failed to create user. Please try again.'],
+          },
+        };
+      }
     },
   });
 

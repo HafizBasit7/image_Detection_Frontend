@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
 import {
-  Box, Typography, Paper, TextField, Button, MenuItem, Grid
+  Box,
+  Typography,
+  Paper,
+  TextField,
+  Button,
+  MenuItem,
+  Grid,
+  Alert,
 } from '@mui/material';
-import { useAdminCreateUser } from '../../api/mutation';
+import { useAdminCreateUserMutation } from '../../api/mutation';
 
 const roles = [
   { value: 'admin', label: 'Admin' },
@@ -13,7 +20,7 @@ const roles = [
 const Users = () => {
   const [form, setForm] = useState({
     username: '',
-    email: '',
+  
     password: '',
     first_name: '',
     last_name: '',
@@ -21,49 +28,125 @@ const Users = () => {
     roll_number: '',
   });
 
-  const { mutate, isPending, isSuccess, isError, error } = useAdminCreateUser();
+  const [formErrors, setFormErrors] = useState({});
+  const { mutate, isPending, isSuccess, isError, error } = useAdminCreateUserMutation();
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setFormErrors({});
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     const userData = { ...form };
 
     if (userData.role === 'student') {
       if (!userData.roll_number.trim()) {
-        alert("Roll number is required for students.");
+        setFormErrors({ roll_number: 'Roll number is required for students' });
         return;
       }
     } else {
       delete userData.roll_number;
-      delete userData.role; // ✅ Let backend handle the role
     }
 
-    console.log("Submitting userData:", userData);
-    mutate(userData);
+    if (userData.role !== 'student') {
+      delete userData.role; // Let backend assign default roles for admin/general
+    }
+
+    mutate(userData, {
+      onSuccess: () => {
+        setForm({
+          username: '',
+         
+          password: '',
+          first_name: '',
+          last_name: '',
+          role: 'general',
+          roll_number: '',
+        });
+      },
+      onError: (err) => {
+        if (err?.error) setFormErrors(err.error);
+      },
+    });
   };
 
   return (
-    <Box>
-      <Typography variant="h5" gutterBottom>Create New User</Typography>
-      <Paper sx={{ p: 3 }}>
+    <Box sx={{ maxWidth: 800, mx: 'auto', p: 2 }}>
+      <Typography variant="h5" fontWeight="bold" gutterBottom>
+        Create New User
+      </Typography>
+
+      <Paper elevation={3} sx={{ p: 4 }}>
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
-            {['username', 'email', 'first_name', 'last_name', 'password'].map(field => (
-              <Grid item xs={12} sm={6} key={field}>
-                <TextField
-                  label={field.replace('_', ' ').toUpperCase()}
-                  name={field}
-                  type={field === 'password' ? 'password' : 'text'}
-                  fullWidth
-                  required
-                  value={form[field]}
-                  onChange={handleChange}
-                />
-              </Grid>
-            ))}
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Username"
+                name="username"
+                fullWidth
+                required
+                value={form.username}
+                onChange={handleChange}
+                error={!!formErrors.username}
+                helperText={formErrors.username?.[0]}
+              />
+            </Grid>
+
+            {/* <Grid item xs={12} sm={6}>
+              <TextField
+                label="Email"
+                name="email"
+                type="email"
+                fullWidth
+                required
+                value={form.email}
+                onChange={handleChange}
+                error={!!formErrors.email}
+                helperText={formErrors.email?.[0]}
+              />
+            </Grid> */}
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="First Name"
+                name="first_name"
+                fullWidth
+                required
+                value={form.first_name}
+                onChange={handleChange}
+                error={!!formErrors.first_name}
+                helperText={formErrors.first_name?.[0]}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Last Name"
+                name="last_name"
+                fullWidth
+                required
+                value={form.last_name}
+                onChange={handleChange}
+                error={!!formErrors.last_name}
+                helperText={formErrors.last_name?.[0]}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Password"
+                name="password"
+                type="password"
+                fullWidth
+                required
+                value={form.password}
+                onChange={handleChange}
+                error={!!formErrors.password}
+                helperText={formErrors.password?.[0]}
+              />
+            </Grid>
 
             <Grid item xs={12} sm={6}>
               <TextField
@@ -83,7 +166,7 @@ const Users = () => {
             </Grid>
 
             {form.role === 'student' && (
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12}>
                 <TextField
                   label="Roll Number"
                   name="roll_number"
@@ -91,29 +174,35 @@ const Users = () => {
                   required
                   value={form.roll_number}
                   onChange={handleChange}
+                  error={!!formErrors.roll_number}
+                  helperText={formErrors.roll_number || ''}
                 />
               </Grid>
             )}
           </Grid>
 
-          <Button
-            type="submit"
-            variant="contained"
-            sx={{ mt: 2 }}
-            disabled={isPending}
-          >
-            {isPending ? 'Creating...' : 'Create User'}
-          </Button>
+          <Box mt={3}>
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              disabled={isPending}
+              sx={{ py: 1.2 }}
+            >
+              {isPending ? 'Creating...' : 'Create User'}
+            </Button>
+          </Box>
 
           {isSuccess && (
-            <Typography color="success.main" mt={2}>
-              User created successfully!
-            </Typography>
+            <Alert severity="success" sx={{ mt: 2 }}>
+              ✅ User created successfully!
+            </Alert>
           )}
-          {isError && (
-            <Typography color="error.main" mt={2}>
-              {error.message}
-            </Typography>
+
+          {isError && !formErrors && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              ❌ Failed to create user. Please try again.
+            </Alert>
           )}
         </form>
       </Paper>
