@@ -22,6 +22,8 @@ import Detections from "./pages/admin/Detections";
 import AdminProfile from "./pages/admin/AdminProfile";
 import UserDetail from "./pages/admin/UserDetail";
 import AdminUserList from "./pages/admin/AdminUserList";
+import LiveStream from "./pages/admin/LiveStream";
+
 
 // General User Pages
 import GeneralDashboard from "./pages/general/Dashboard";
@@ -62,6 +64,7 @@ function App() {
         <Route path="upload-video" element={<UploadVideo />} />
         <Route path="detections" element={<Detections />} />
         <Route path="profile" element={<AdminProfile />} />
+        <Route path="live-stream" element={<LiveStream />} />
       </Route>
 
       {/* General User Protected Routes */}

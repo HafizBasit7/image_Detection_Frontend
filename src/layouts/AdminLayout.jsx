@@ -30,6 +30,8 @@ import {
   Logout as LogoutIcon,
   Menu as MenuIcon
 } from '@mui/icons-material';
+import CameraAltIcon from '@mui/icons-material/CameraAlt'; // 🟢 Correct
+
 import { useLogoutMutation } from '../api/mutation';
 
 const drawerWidth = 240;
@@ -67,6 +69,8 @@ const AdminLayout = () => {
     { label: 'Upload Video', path: '/admin/upload-video', icon: <VideoIcon sx={{ color: '#66bb6a' }} /> },
     { label: 'Detections', path: '/admin/detections', icon: <DetectionsIcon sx={{ color: '#ba68c8' }} /> },
     { label: 'Profile', path: '/admin/profile', icon: <ProfileIcon sx={{ color: '#ffa726' }} /> },
+    { label: 'Live Stream', path: '/admin/live-stream', icon: <CameraAltIcon sx={{ color: '#4fc3f7' }} /> },
+
   ];
 
   const drawerContent = (
