@@ -54,11 +54,29 @@ const LiveStream = () => {
   const detectionInterval = useRef(null);
 
   // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      stopDetection();
-    };
-  }, []);
+ useEffect(() => {
+  // Initialize models when component mounts
+  const initialize = async () => {
+    try {
+      await loadModels();
+      
+      // Pre-warm the face detection (helps with first-time detection)
+      if (videoRef.current) {
+        setTimeout(() => {
+          if (isDetecting) detectOnVideo();
+        }, 1000);
+      }
+    } catch (error) {
+      console.error("Initialization error:", error);
+    }
+  };
+  
+  initialize();
+
+  return () => {
+    stopDetection();
+  };
+}, []); // Empty dependency array means this runs once on mount
 
   // Initialize models
   const loadModels = async () => {
@@ -521,51 +539,77 @@ const LiveStream = () => {
       </Paper>
 
       {/* All Faces Dialog */}
-      <Dialog 
-        open={showFacesDialog} 
-        onClose={() => setShowFacesDialog(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>All Stored Faces</DialogTitle>
-        <DialogContent dividers>
-          {storedFaces.length === 0 ? (
-            <Typography>No faces found in database</Typography>
-          ) : (
-            <Grid container spacing={2}>
-              {storedFaces.map((face, index) => (
-                <Grid item xs={6} sm={4} md={3} key={index}>
-                  <Card>
-                    <Box sx={{ 
-                      height: 140, 
-                      overflow: 'hidden',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-                      <img
-                        src={face.url}
-                        alt={face.name}
-                        style={{ 
-                          width: '100%', 
-                          height: 'auto',
-                          objectFit: 'cover'
-                        }}
-                      />
-                    </Box>
-                    <CardContent sx={{ p: 1 }}>
-                      <Typography variant="body2" noWrap>{face.name}</Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowFacesDialog(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
+  
+<Dialog 
+  open={showFacesDialog} 
+  onClose={() => setShowFacesDialog(false)}
+  maxWidth="lg" // Changed from md to lg for more space
+  fullWidth
+>
+  <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+    <Visibility color="primary" />
+    <Typography variant="h6">All Stored Faces ({storedFaces.length})</Typography>
+  </DialogTitle>
+  <DialogContent dividers sx={{ pt: 2 }}>
+    {storedFaces.length === 0 ? (
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        py: 4 
+      }}>
+        <Error color="disabled" sx={{ fontSize: 60, mb: 2 }} />
+        <Typography variant="h6" color="text.secondary">
+          No faces found in database
+        </Typography>
+      </Box>
+    ) : (
+      <Grid container spacing={3}>
+        {storedFaces.map((face, index) => (
+          <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
+            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <Box sx={{ 
+                position: 'relative',
+                pt: '100%', // Square aspect ratio
+                overflow: 'hidden'
+              }}>
+                <img
+                  src={face.url}
+                  alt={face.name}
+                  style={{ 
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                />
+              </Box>
+              <CardContent sx={{ flexGrow: 1 }}>
+                <Typography gutterBottom variant="subtitle1">
+                  {face.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {face.rollNumber || 'N/A'}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    )}
+  </DialogContent>
+  <DialogActions>
+    <Button 
+      onClick={() => setShowFacesDialog(false)}
+      variant="contained"
+      color="primary"
+    >
+      Close
+    </Button>
+  </DialogActions>
+</Dialog>
     </Container>
   );
 };
